@@ -29,72 +29,72 @@ int term_cols=0;
 
 void str_send(int sockfd)
 {
-	char sendline[MAXLINE];
-	char key;
-	char * flag="-> ";
-	char * esc="exit\n";
-	for(;;){
-		fputs(flag,stdout);
-		if(fgets(sendline,MAXLINE,stdin)!=NULL){
-			if(strcmp(esc,sendline)==0){
-				break;
-			}
-			writen(sockfd,sendline,MAXLINE);
-			//printf("[server]\tsend ok.\n");
-		}else{
-			break;
-		}
-	}
+    char sendline[MAXLINE];
+    char key;
+    char * flag="-> ";
+    char * esc="exit\n";
+    for(;;){
+        fputs(flag,stdout);
+        if(fgets(sendline,MAXLINE,stdin)!=NULL){
+            if(strcmp(esc,sendline)==0){
+                break;
+            }
+            writen(sockfd,sendline,MAXLINE);
+            //printf("[server]\tsend ok.\n");
+        }else{
+            break;
+        }
+    }
 }
 void str_recv(int sockfd)
 {
-	int space_num,i;
-	char recvline[MAXLINE];
-	char * flag=" <-[client]\n-> ";
+    int space_num,i;
+    char recvline[MAXLINE];
+    char * flag=" <-[client]\n-> ";
 
-	for(;;){
-		memset(recvline,'\0',sizeof(recvline));
-		if(read(sockfd,recvline,MAXLINE)==0){
-			//err_quit("[server]\tterminated prematurely");
-			exit(0);
-		}
-		space_num=term_cols-strlen(recvline)-strlen(flag)-15;
-		if(space_num<0){
-			space_num=0;
-		}
-		printf("\r");
-		for(i=0;i<space_num;i++){
-			printf(" ");
-		}
-		recvline[strlen(recvline)-1]='\0';
-		//printf("[%d chars received]",strlen(recvline));
-		fputs(recvline,stdout);
-		fputs(flag,stdout);
-		fflush(stdout);
-	}
+    for(;;){
+        memset(recvline,'\0',sizeof(recvline));
+        if(read(sockfd,recvline,MAXLINE)==0){
+            //err_quit("[server]\tterminated prematurely");
+            exit(0);
+        }
+        space_num=term_cols-strlen(recvline)-strlen(flag)-15;
+        if(space_num<0){
+            space_num=0;
+        }
+        printf("\r");
+        for(i=0;i<space_num;i++){
+            printf(" ");
+        }
+        recvline[strlen(recvline)-1]='\0';
+        //printf("[%d chars received]",strlen(recvline));
+        fputs(recvline,stdout);
+        fputs(flag,stdout);
+        fflush(stdout);
+    }
 }
 
 static void sig_winch()
 {
-	struct winsize size;
-			
-	if(ioctl(STDIN_FILENO,TIOCGWINSZ,(char *)&size)<0){
-		err_sys("[server]TIOCGWINSZ error");
-	}
-	term_cols=size.ws_col;
+    struct winsize size;
+            
+    if(ioctl(STDIN_FILENO,TIOCGWINSZ,(char *)&size)<0){
+        err_sys("[server]TIOCGWINSZ error");
+    }
+    term_cols=size.ws_col;
 }
 
 int main()//server
 {
-	/****获取终端窗口改变信号*****/
-	if(isatty(STDIN_FILENO)==0){
-		exit(1);
-	}
-	if(signal(SIGWINCH,sig_winch)==SIG_ERR){
-		err_sys("signal error");
-	}
-		sig_winch();
-	/*****************************/
+    /****获取终端窗口改变信号*****/
+    if(isatty(STDIN_FILENO)==0){
+        exit(1);
+    }
+    if(signal(SIGWINCH,sig_winch)==SIG_ERR){
+        err_sys("signal error");
+    }
+        sig_winch();
+    /*****************************/
     pid_t childpid;
     int listenfd,connfd;
     socklen_t clilen;
@@ -114,12 +114,12 @@ int main()//server
         if((childpid=fork())==0){//child
             close(listenfd);
             str_send(connfd);
-			exit(0);
+            exit(0);
       //  }else if((childpid=fork())==0){
         }else{
-			str_recv(connfd);
-			exit(0);
-		}
+            str_recv(connfd);
+            exit(0);
+        }
         close(connfd);
     }
 }
